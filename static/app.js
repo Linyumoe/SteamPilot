@@ -572,13 +572,14 @@ function renderUpdateStatus() {
     return;
   }
   if (info.available) {
-    el.textContent = `发现新版本 v${info.latest} · 点「前往下载」查看`;
+    el.textContent = `发现新版本 v${info.latest} · 点右侧查看`;
     el.className = "has-update";
     if (btn) btn.textContent = "前往下载";
   } else if (info.error) {
-    el.textContent = info.error;
+    // 检查失败（常见于 GitHub 访问受限）时保留手动入口，不让用户卡死。
+    el.textContent = `${info.error} · 可手动打开发布页`;
     el.className = "check-error";
-    if (btn) btn.textContent = "重试";
+    if (btn) btn.textContent = "发布页";
   } else {
     el.textContent = `当前版本 v${info.current} · 已是最新版本`;
     if (btn) btn.textContent = "检查";
@@ -739,9 +740,9 @@ document.addEventListener("click", async (e) => {
   const cdnRetest = e.target.closest("[data-cdn-retest]");
   if (cdnRetest) return retest(cdnRetest.dataset.cdnRetest);
 
-  // 设置页：检查更新 / 有新版本时前往下载
+  // 设置页：检查更新 / 有新版或检查失败时打开发布页（保证任何状态都有手动入口）
   if (e.target.closest("#btn-check-update")) {
-    if (ui.updateInfo && ui.updateInfo.available) {
+    if (ui.updateInfo && (ui.updateInfo.available || ui.updateInfo.error)) {
       if (inTauri) await invoke("open_releases");
       else window.open("https://github.com/Linyumoe/SteamPilot/releases/latest", "_blank");
       return;
