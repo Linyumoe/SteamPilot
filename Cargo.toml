@@ -30,7 +30,7 @@ rcgen = { version = "0.13", default-features = false, features = ["ring", "pem"]
 
 # 系统代理 + PAC 接管：写 Internet Settings 并即时刷新 WinINET
 [target.'cfg(windows)'.dependencies]
-windows-sys = { version = "0.52", features = ["Win32_Foundation", "Win32_Networking_WinInet", "Win32_System_Registry"] }
+windows-sys = { version = "0.52", features = ["Win32_Foundation", "Win32_Networking_WinInet", "Win32_System_Registry", "Win32_Security_Cryptography"] }
 
 # 发布版按体积优化：去掉调试符号、开 LTO、缩小代码
 [profile.release]

@@ -4,6 +4,7 @@
 //!   - CA 私钥只落在本机 %LOCALAPPDATA%，不上传、不外发。
 //!   - 安装根证书必须由用户在界面上显式点击，绝不静默执行。
 
+use crate::dpapi;
 use anyhow::{bail, Context, Result};
 use rcgen::{
     BasicConstraints, Certificate, CertificateParams, DistinguishedName, DnType, IsCa, KeyPair,
@@ -48,16 +49,27 @@ impl CaStore {
     pub fn load_or_create() -> Result<Self> {
         let dir = ca_dir()?;
         let cert_path = dir.join("ca.crt");
-        let key_path = dir.join("ca.key");
+        let key_path = dir.join("ca.key"); // 旧版明文私钥（迁移后删除）
+        let enc_path = dir.join("ca.key.enc"); // DPAPI 加密后的私钥
 
         // CA 私钥是根本：只要私钥在，就能重建出同公钥的 CA 证书（序列号不同，本地信任无影响）。
-        // 第一次运行时生成并落盘，之后每次从私钥重建，避免 rcgen 无法从 PEM 反序列化 CA 对象的限制。
-        let key_pem = if key_path.exists() {
-            fs::read_to_string(&key_path).context("read CA key")?
+        // 落盘前用 DPAPI 以当前用户凭据加密；只有同一 Windows 用户能解，换用户/换机器拿到文件也无效。
+        let key_pem = if enc_path.exists() {
+            let blob = fs::read(&enc_path).context("read encrypted CA key")?;
+            let plain = dpapi::unprotect(&blob).context("decrypt CA key")?;
+            String::from_utf8(plain).context("CA key is not UTF-8")?
+        } else if key_path.exists() {
+            // 兼容迁移：旧版明文私钥 → 加密落盘 → 删除明文，根证书保持同一把，用户不用重装。
+            let pem = fs::read_to_string(&key_path).context("read legacy CA key")?;
+            let blob = dpapi::protect(pem.as_bytes()).context("encrypt legacy CA key")?;
+            fs::write(&enc_path, &blob).context("write encrypted CA key")?;
+            let _ = fs::remove_file(&key_path); // 明文删不掉也不影响：下次启动时 enc 优先
+            pem
         } else {
             let key = KeyPair::generate().context("generate CA key")?;
             let pem = key.serialize_pem();
-            fs::write(&key_path, &pem).context("write CA key")?;
+            let blob = dpapi::protect(pem.as_bytes()).context("encrypt CA key")?;
+            fs::write(&enc_path, &blob).context("write encrypted CA key")?;
             pem
         };
         let key = KeyPair::from_pem(&key_pem).context("parse CA key")?;

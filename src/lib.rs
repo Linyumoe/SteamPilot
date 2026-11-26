@@ -1,6 +1,7 @@
 pub mod ca;
 pub mod capture;
 pub mod core;
+pub mod dpapi;
 pub mod proxy;
 pub mod selector;
 pub mod tray;
