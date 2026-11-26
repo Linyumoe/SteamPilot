@@ -28,9 +28,33 @@ fn tls_connector() -> TlsConnector {
     TlsConnector::from(Arc::new(cfg))
 }
 
+/// 在独立线程上自建 Tokio runtime 运行任务。
+///
+/// 注意：调用方（Tauri `.setup()`）是同步上下文，**没有 Tokio runtime**，
+/// 直接 `tokio::spawn` 会 panic 让整个进程闪退（v0.1.1 曾因此黑屏退出）。
+/// 抽成独立函数便于单测在「无 ambient runtime」的场景下验证，防止回归。
+fn spawn_with_own_runtime<F>(future: F)
+where
+    F: std::future::Future<Output = ()> + Send + 'static,
+{
+    std::thread::Builder::new()
+        .name("steampilot-monitor".into())
+        .spawn(move || {
+            let rt = match tokio::runtime::Builder::new_current_thread()
+                .enable_all()
+                .build()
+            {
+                Ok(rt) => rt,
+                Err(_) => return,
+            };
+            rt.block_on(future);
+        })
+        .ok();
+}
+
 /// 启动常驻探针。应用退出时置位 stop 即停。
 pub fn start(app: AppHandle, state: Arc<Mutex<AppState>>, stop: Arc<AtomicBool>) {
-    tokio::spawn(async move {
+    spawn_with_own_runtime(async move {
         let connector = tls_connector();
         // 首轮延后一个周期，避免刚启动就探测；用户手动「重新测速」走 refresh_nodes。
         let mut first = true;
@@ -154,5 +178,20 @@ mod tests {
     fn stop_flag_defaults_to_running() {
         let stop = Arc::new(AtomicBool::new(false));
         assert!(!stop.load(Ordering::SeqCst));
+    }
+
+    /// 回归测试：v0.1.1 曾在 `.setup()`（无 Tokio runtime）里直接 tokio::spawn 而 panic 闪退。
+    /// 在刻意不建 runtime 的线程里调用，确认自建 runtime 的 future 真的执行了且不 panic。
+    #[test]
+    fn own_runtime_works_without_ambient_runtime() {
+        use std::sync::mpsc;
+        let (tx, rx) = mpsc::channel();
+        // 此线程没有任何 Tokio runtime；旧实现（直接 tokio::spawn）会 panic。
+        spawn_with_own_runtime(async move {
+            tokio::time::sleep(Duration::from_millis(10)).await;
+            let _ = tx.send(());
+        });
+        rx.recv_timeout(Duration::from_secs(2))
+            .expect("自建 runtime 的 future 未执行");
     }
 }
