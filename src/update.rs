@@ -94,7 +94,10 @@ async fn https_get(host: &str, path: &str) -> anyhow::Result<String> {
     let body = raw.split_once("\r\n\r\n").map(|(_, b)| b).unwrap_or("");
 
     // GitHub 可能回 chunked，去掉块长度行拼回正文。
-    if raw.lines().any(|l| l.to_ascii_lowercase().contains("transfer-encoding: chunked")) {
+    if raw.lines().any(|l| {
+        l.to_ascii_lowercase()
+            .contains("transfer-encoding: chunked")
+    }) {
         Ok(dechunk(body))
     } else {
         Ok(body.to_string())
@@ -171,9 +174,7 @@ pub fn open_releases() -> anyhow::Result<()> {
 pub fn open_url(url: &str) -> anyhow::Result<()> {
     #[cfg(windows)]
     {
-        std::process::Command::new("explorer")
-            .arg(url)
-            .spawn()?;
+        std::process::Command::new("explorer").arg(url).spawn()?;
     }
     #[cfg(not(windows))]
     {
