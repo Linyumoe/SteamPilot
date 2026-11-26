@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SteamPilot · 蒸汽领航</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="app">
+  <!-- ==================== 左侧导航 ==================== -->
+  <aside class="rail">
+    <div class="brand">
+      <div class="brand-mark">SP</div>
+      <div class="brand-txt">
+        <strong>SteamPilot</strong>
+        <span>蒸汽领航 v0.1.0</span>
+      </div>
+    </div>
+
+    <nav class="nav" id="nav">
+      <button class="nav-item active" data-view="home">
+        <svg viewBox="0 0 24 24"><path d="M4 11.2 12 4l8 7.2V20H4z"/><path d="M9.5 20v-6h5v6"/></svg>
+        <span class="nav-txt"><b>加速</b><i id="nav-sub-home">四步完成设置</i></span>
+      </button>
+      <button class="nav-item nav-home-toggle" data-view="advanced">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M4 7h4M16 7h4M4 17h10M18 17h2M10 4v6M18 14v6"/></svg>
+        <span class="nav-txt"><b>更多设置</b><i>网站 · 线路 · 证书</i></span>
+      </button>
+      <div class="nav-divider nav-advanced"></div>
+      <button class="nav-item nav-advanced" data-view="services">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="14" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 17.5h.01"/></svg>
+        <span class="nav-txt"><b>网站列表</b><i id="nav-sub-services">0 / 0</i></span>
+      </button>
+      <button class="nav-item nav-advanced" data-view="cdn">
+        <svg viewBox="0 0 24 24"><path d="M6.5 18.5a4.5 4.5 0 0 1-.3-9A6 6 0 0 1 18 10a4.25 4.25 0 0 1-.4 8.5H6.5Z"/><path d="M12 13v4"/></svg>
+        <span class="nav-txt"><b>线路测速</b><i id="nav-sub-cdn">0 / 4 线路启用</i></span>
+      </button>
+      <button class="nav-item nav-advanced" data-view="settings">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M4 7h4M16 7h4M4 17h10M18 17h2M10 4v6M18 14v6"/></svg>
+        <span class="nav-txt"><b>常规设置</b><i>开机 · 代理 · 证书</i></span>
+      </button>
+    </nav>
+
+    <div class="rail-gap"></div>
+
+    <div class="rail-actions">
+      <button class="rail-btn" id="quit-app">
+        <svg viewBox="0 0 24 24"><path d="M12 3v8"/><path d="M6.5 6.5a8 8 0 1 0 11 0"/></svg>
+        <span>退出 SteamPilot</span>
+      </button>
+    </div>
+
+    <div class="rail-status">
+      <span class="dot" id="side-dot"></span>
+      <span id="side-status">后端已连接</span>
+    </div>
+  </aside>
+
+  <!-- ==================== 工作区 ==================== -->
+  <div class="workspace">
+
+    <!-- ---------- 首页：四步引导 ---------- -->
+    <section class="view active" id="view-home">
+      <div class="home-wrap">
+        <div class="home-card">
+          <div class="home-top">
+            <div class="home-brand">
+              <span class="home-mark">SP</span>
+              <div>
+                <h1>SteamPilot</h1>
+                <p>让 Steam、GitHub 等网站正常打开</p>
+              </div>
+            </div>
+            <button class="btn-icon" id="home-theme" title="切换深浅主题" aria-label="切换主题">
+              <svg viewBox="0 0 24 24"><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4"/><circle cx="12" cy="12" r="4"/></svg>
+            </button>
+          </div>
+
+          <div class="home-welcome">
+            <strong>第一次使用？按下面 4 步来就行</strong>
+            <span>大约 1 分钟 · 其他网站照常使用</span>
+          </div>
+
+          <ol class="steps-list">
+            <li class="step-item" id="step-ca">
+              <span class="step-no" data-num="1">1</span>
+              <div class="step-body">
+                <div class="step-line"><strong>安装安全证书</strong><span class="step-state" id="step-ca-state">未完成</span></div>
+                <p>让浏览器信任本机的加速通道。只对你当前的 Windows 账户生效，随时可以卸载。</p>
+                <button class="btn-sm accent" id="step-ca-btn">安装证书</button>
+              </div>
+            </li>
+
+            <li class="step-item" id="step-nodes">
+              <span class="step-no" data-num="2">2</span>
+              <div class="step-body">
+                <div class="step-line"><strong>挑一条最快的线路</strong><span class="step-state" id="step-nodes-state">未测速</span></div>
+                <p>给内置线路测一遍速，自动挑出当前能用的。不会改动你的 DNS 设置。</p>
+                <button class="btn-sm accent" id="step-nodes-btn">开始测速</button>
+              </div>
+            </li>
+
+            <li class="step-item" id="step-sites">
+              <span class="step-no" data-num="3">3</span>
+              <div class="step-body">
+                <div class="step-line"><strong>选要加速的网站</strong><span class="step-state" id="step-sites-state">已选 0 个</span></div>
+                <p>只加速你勾选的网站，没勾选的照常直连。</p>
+                <div class="home-sites" id="home-sites"></div>
+              </div>
+            </li>
+
+            <li class="step-item" id="step-run">
+              <span class="step-no" data-num="4">4</span>
+              <div class="step-body">
+                <button class="home-run" id="home-run">
+                  <svg viewBox="0 0 24 24" class="home-run-ico"><path d="M8 5.5v13l11-6.5z" fill="currentColor" stroke="none"/></svg>
+                  <span id="home-run-label">启动加速</span>
+                </button>
+                <p class="home-hint" id="home-hint">完成前面的步骤后即可启动。</p>
+              </div>
+            </li>
+          </ol>
+
+          <details class="home-help">
+            <summary>为什么要装证书、选线路？</summary>
+            <p>这些网站在国内访问时容易被干扰，常常打不开或特别慢。软件会先把它们引到本机的加速通道，再从提前测速挑出来的线路转发出去。证书只是让浏览器信任这条本机通道。只有你勾选的网站会走加速，其他网站照常直连。</p>
+            <p>隐私说明：已勾选网站的 HTTPS 内容会经过本机代理，理论上在本机可见；软件不会记录 Cookie、密码等信息，也不会上传。不勾选的网站完全不经过本软件。</p>
+          </details>
+
+          <div class="home-foot">
+            <button class="link-btn" data-goto="advanced">更多设置 →</button>
+            <button class="link-btn" id="home-quit">退出</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- 服务管理 ---------- -->
+    <section class="view" id="view-services">
+      <div class="page">
+        <header class="page-head">
+          <div>
+            <h2>服务管理</h2>
+            <p>勾选需要加速的站点；创意工坊修复是 Steam 的内置子功能。</p>
+          </div>
+          <div class="page-actions">
+            <span class="pill" id="svc-count">已启用 0 / 0</span>
+          </div>
+        </header>
+        <div class="tree" id="service-tree"></div>
+        <footer class="simple-foot">
+          <span class="foot-note">本地节点池 · 手动更新</span>
+          <button class="btn-sm" id="btn-refresh">重新优选</button>
+        </footer>
+      </div>
+    </section>
+
+    <!-- ---------- CDN 优选 ---------- -->
+    <section class="view" id="view-cdn">
+      <div class="page">
+        <header class="page-head">
+          <div>
+            <h2>CDN 优选与上游加速</h2>
+            <p>每条线路独立测速，只对启用的线路生效，其余流量保持直连。</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn-sm" id="cdn-settings-btn" title="测速设置">
+              <svg viewBox="0 0 24 24" class="btn-ico"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg>
+              测速设置
+            </button>
+          </div>
+        </header>
+
+        <div class="cdn-controls">
+          <label class="cc-num"><span>测速总限速</span><input class="text-input narrow" id="cdn-total-limit" type="number" min="10" max="10000" step="10" value="1000" /><em>Mbps</em></label>
+          <span class="pill" id="cdn-last-test">尚未测速</span>
+        </div>
+
+        <div class="cdn-list" id="cdn-grid"></div>
+
+        <footer class="simple-foot">
+          <span class="foot-note">本地节点池 · 手动更新 · 仅 IPv4</span>
+          <button class="btn-sm" id="btn-refresh">重新测速已启用的 CDN</button>
+        </footer>
+      </div>
+    </section>
+
+    <!-- ---------- 设置 ---------- -->
+    <section class="view" id="view-settings">
+      <div class="page">
+        <div class="tab-pane active">
+          <section class="sec">
+            <div class="sec-head"><h3>常规</h3></div>
+            <div class="row-line">
+              <div class="row-label"><strong>界面主题</strong><span>切换后立即生效并记住选择</span></div>
+              <select id="set-theme"><option value="dark">深色</option><option value="light">浅色</option></select>
+            </div>
+            <label class="row-line">
+              <div class="row-label"><strong>开机自启</strong><span>登录 Windows 后自动启动</span></div>
+              <input type="checkbox" class="sw" id="set-startup" />
+            </label>
+            <label class="row-line">
+              <div class="row-label"><strong>静默启动</strong><span>只驻留托盘，不弹出主窗口</span></div>
+              <input type="checkbox" class="sw" id="set-silent" />
+            </label>
+            <label class="row-line">
+              <div class="row-label"><strong>启动后自动加速</strong><span>沿用上次启用的服务</span></div>
+              <input type="checkbox" class="sw" id="set-auto" />
+            </label>
+            <label class="row-line">
+              <div class="row-label"><strong>自动检查更新</strong><span>GitHub Releases 通道</span></div>
+              <input type="checkbox" class="sw" id="set-update" checked />
+            </label>
+          </section>
+
+          <section class="sec">
+            <div class="sec-head"><h3>网络接管</h3><span class="pill ok">系统代理 + PAC</span></div>
+            <p class="sec-note">启动时把系统代理指向一个本地分流文件：只有勾选的网站走加速，其他网站照常直连。不需要管理员权限，也不装虚拟网卡。</p>
+            <label class="row-line">
+              <div class="row-label"><strong>退出时自动恢复</strong><span>关闭软件时还原你原来的代理设置</span></div>
+              <input type="checkbox" class="sw" id="capture-restore" checked />
+            </label>
+          </section>
+
+          <section class="sec">
+            <div class="sec-head"><h3>本地证书</h3><span class="pill" id="ca-pill">未安装</span></div>
+            <div class="cert-card">
+              <div class="cert-ico">
+                <svg viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="m9 12 2 2 4-4"/></svg>
+              </div>
+              <div class="cert-txt">
+                <strong id="ca-status">本地根证书未安装</strong>
+                <p>浏览器到本地代理这一段需要被信任的证书。安装会弹出系统确认，程序绝不静默写入根证书。</p>
+              </div>
+              <div class="cert-actions">
+                <button class="btn-sm accent" id="install-ca">安装证书</button>
+                <button class="btn-sm" id="uninstall-ca">取消信任</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+  <!-- ---------- 测速设置抽屉 ---------- -->
+  <div class="drawer-mask" id="drawer-mask"></div>
+  <aside class="drawer" id="test-drawer" aria-hidden="true">
+    <div class="drawer-head">
+      <div><h3>测速设置</h3><p>测速标的按线路分开，其余参数对所有线路生效</p></div>
+      <button class="btn-icon" id="drawer-close" title="关闭" aria-label="关闭">
+        <svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+
+    <div class="drawer-body">
+      <div class="tset-grid">
+        <section class="tset-group">
+          <h4>测速标的（按线路）</h4>
+          <p class="tset-tip">每条线路只测自己 CDN 上的文件。四家链接不能共用，否则测出来的速率是假的。</p>
+          <div class="url-list" id="ts-url-list"></div>
+
+          <h4>候选与复用</h4>
+          <label class="tset-row">
+            <div><strong>复用 5 分钟内的优选结果</strong><small>重复测速时先看上次结果是否还新</small></div>
+            <input type="checkbox" class="sw" id="ts-reuse" />
+          </label>
+          <label class="tset-row">
+            <div><strong>随机替换被测 IP</strong><small>测速前将每个 IPv4 的末段随机替换为 10~254</small></div>
+            <input type="checkbox" class="sw" id="ts-random-tail" />
+          </label>
+          <div class="tset-row">
+            <div><strong>测速 IP 列表</strong><small>使用内置节点池，本地文件手动更新</small></div>
+            <span class="pill" id="ts-ip-count">0 个 IP</span>
+          </div>
+        </section>
+
+        <section class="tset-group">
+          <h4>速率筛选</h4>
+          <label class="tset-row">
+            <div><strong>最低速率</strong><small>全部批次测速汇总后，低于该速率的节点不进入结果</small></div>
+            <span class="num-wrap"><input class="text-input narrow" id="ts-min-speed" type="number" min="1" max="10000" step="1" value="10" /><em>Mbps</em></span>
+          </label>
+          <label class="tset-row">
+            <div><strong>优选 IP 保留上限</strong><small>汇总后按速度优先、延迟次优先保留</small></div>
+            <input class="text-input narrow" id="ts-keep" type="number" min="1" max="64" value="2" />
+          </label>
+
+          <h4>批次与并发</h4>
+          <label class="tset-row">
+            <div><strong>参与后续检测数量</strong><small>0 表示全部 IP；否则按延迟从快到慢取</small></div>
+            <input class="text-input narrow" id="ts-stage1" type="number" min="0" max="256" value="8" />
+          </label>
+          <label class="tset-row">
+            <div><strong>每批测速 IP 上限</strong><small>一次只测一个，结果最稳但会慢一些</small></div>
+            <input class="text-input narrow" id="ts-batch" type="number" min="1" max="64" value="1" />
+          </label>
+          <label class="tset-row">
+            <div><strong>手动及启动测速并发数</strong><small>内部并发，不是同时启用的 CDN 数量</small></div>
+            <input class="text-input narrow" id="ts-concurrency" type="number" min="1" max="128" value="8" />
+          </label>
+        </section>
+      </div>
+
+      <details class="tset-adv">
+        <summary>高级探测参数</summary>
+        <div class="tset-adv-body">
+          <label class="tset-row"><div><strong>握手超时</strong><small>TCP + TLS 握手等待上限</small></div><span class="num-wrap"><input class="text-input narrow" id="ts-timeout" type="number" min="500" max="15000" step="500" value="4000" /><em>ms</em></span></label>
+          <label class="tset-row"><div><strong>取样大小</strong><small>下载测速的 Range 取样长度</small></div><span class="num-wrap"><input class="text-input narrow" id="ts-sample" type="number" min="1" max="64" value="8" /><em>MB</em></span></label>
+          <label class="tset-row"><div><strong>上游别名 SNI</strong><small>Akamai 证书校验所用的合法别名</small></div>
+            <select id="ts-alias">
+              <option value="auto">自动轮换</option>
+              <option value="steamcommunity-a.akamaihd.net">steamcommunity-a.akamaihd.net</option>
+              <option value="steamstore-a.akamaized.net">steamstore-a.akamaized.net</option>
+              <option value="steamcdn-a.akamaihd.net">steamcdn-a.akamaihd.net</option>
+              <option value="steambroadcast.akamaized.net">steambroadcast.akamaized.net</option>
+            </select>
+          </label>
+          <label class="tset-row"><div><strong>证书校验保留数</strong><small>通过严格验签后进入测速的节点数</small></div><input class="text-input narrow" id="ts-stage2" type="number" min="1" max="64" value="4" /></label>
+        </div>
+      </details>
+    </div>
+
+    <div class="drawer-foot">
+      <span class="drawer-note">设置保存在本机，不影响白名单以外的流量。</span>
+      <div>
+        <button class="btn-sm" id="drawer-cancel">取消</button>
+        <button class="btn-sm accent" id="drawer-save">保存设置</button>
+      </div>
+    </div>
+  </aside>
+
+<div class="toast" id="toast"></div>
+<script src="nodes-data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

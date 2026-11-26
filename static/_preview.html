@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><title>SteamPilot 预览</title></head>
+<body style="margin:0;background:#000;overflow:hidden">
+  <div style="width:1240px;height:820px;transform:scale(.66);transform-origin:0 0">
+    <iframe id="f" src="index.html" style="width:1240px;height:820px;border:0;display:block"></iframe>
+  </div>
+  <script>
+    const p = new URLSearchParams(location.search);
+    const f = document.getElementById("f");
+    const th0 = p.get("theme");
+    if (th0) f.src = `index.html?theme=${th0}`;
+    f.addEventListener("load", () => {
+      const d = f.contentDocument;
+      const v = p.get("v");
+      if (v) {
+        const b = d.querySelector(`[data-view="${v}"]`);
+        if (b) b.click();
+      }
+      const t = p.get("t");
+      if (t) {
+        const b = d.querySelector(`.subtab[data-tab="${t}"]`);
+        if (b) b.click();
+      }
+      const op = p.get("open");
+      if (op) {
+        const b = d.querySelector(`[data-info="${op}"]`);
+        if (b) b.click();
+      }
+      if (p.get("drawer")) {
+        const b = d.getElementById("cdn-settings-btn");
+        if (b) b.click();
+      }
+      const th = p.get("theme");
+      if (th) setTimeout(() => { d.documentElement.dataset.theme = th; }, 250);
+    });
+  </script>
+</body>
+</html>

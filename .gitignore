@@ -1,0 +1,20 @@
+# Rust 构建产物（体积巨大，必须排除）
+/target/
+
+# Tauri 自动生成的 schema 缓存（可由 tauri.conf.json 重建）
+/gen/schemas/
+
+# 本地 CA 私钥与签发的证书（敏感，绝不提交）
+*.key
+*.pem
+*.crt
+*.pfx
+
+# 运行时数据在 %LOCALAPPDATA%\SteamPilot，不在仓库内；这里防呆
+SteamPilot/
+*.log
+
+# 系统/编辑器临时文件
+.DS_Store
+Thumbs.db
+*.swp

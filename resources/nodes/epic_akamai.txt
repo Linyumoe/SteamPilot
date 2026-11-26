@@ -1,0 +1,19 @@
+# Epic Games 下载节点 / Akamai（2026-11-26 实测）
+# 格式: IP  延迟ms  SNI(真域名)
+# 判据: SNI=Host=epicgames-download1.akamaized.net 标准验签 + Range GET 206，两轮复测稳定
+# 测速标的: /Builds/UnrealEngineLauncher/Installers/Windows/EpicInstaller-20.3.3.msi
+184.30.30.226  433ms  epicgames-download1.akamaized.net
+184.26.127.25  620ms  epicgames-download1.akamaized.net
+184.27.185.73  745ms  epicgames-download1.akamaized.net
+184.26.43.86   778ms  epicgames-download1.akamaized.net
+184.150.58.138 1127ms epicgames-download1.akamaized.net
+184.30.30.249  1286ms epicgames-download1.akamaized.net
+184.86.250.11  1579ms epicgames-download1.akamaized.net
+184.25.51.64   900ms  epicgames-download1.akamaized.net
+184.27.185.72  745ms  epicgames-download1.akamaized.net
+184.26.127.18  620ms  epicgames-download1.akamaized.net
+184.25.51.74   900ms  epicgames-download1.akamaized.net
+184.150.58.152 1127ms epicgames-download1.akamaized.net
+184.150.154.27 1200ms epicgames-download1.akamaized.net
+184.86.250.8   1579ms epicgames-download1.akamaized.net
+184.84.238.112 900ms  epicgames-download1.akamaized.net

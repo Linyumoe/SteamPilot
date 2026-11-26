@@ -1,0 +1,7 @@
+# Epic Games 下载节点 / Fastly（2026-11-26 实测）
+# 格式: IP  延迟ms  SNI(真域名)
+# 判据: SNI=Host=fastly-download.epicgames.com 标准验签 + Range GET 206，两轮复测稳定
+# 测速标的: /Builds/UnrealEngineLauncher/Installers/Windows/EpicInstaller-20.3.3.msi
+146.75.113.133  250ms  fastly-download.epicgames.com
+199.232.161.133 276ms  fastly-download.epicgames.com
+146.75.25.133   1621ms fastly-download.epicgames.com

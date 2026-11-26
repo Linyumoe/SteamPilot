@@ -1,0 +1,15 @@
+# 可用节点：IP  延迟ms  SNI  字节数 | Host=steamcommunity.com, HTTP 200 + Steam 社区页面
+23.220.68.149      471ms steamvideo-a.akamaihd.net 47429B
+23.193.186.144     485ms steamcommunity-a.akamaihd.net 47425B
+23.205.155.17      500ms steamstore-a.akamaized.net 47436B
+203.80.97.48       505ms steamcommunity-a.akamaihd.net 47429B
+23.220.70.92       583ms steamcommunity-a.akamaihd.net 47328B
+23.220.68.146      652ms steamcdn-a.akamaihd.net 47428B
+23.220.70.68       672ms steamcommunity-a.akamaihd.net 47321B
+203.80.97.33       727ms steamvideo-a.akamaihd.net 47321B
+23.193.186.141     782ms steamcommunity-a.akamaihd.net 47428B
+23.54.155.212      966ms steamcommunity-a.akamaihd.net 47319B
+23.54.155.202      974ms steamcommunity-a.akamaihd.net 47425B
+23.214.95.216      991ms steamcdn-a.akamaihd.net 47321B
+23.212.190.162     1089ms steamcommunity-a.akamaihd.net 47423B
+23.212.190.144     1210ms steamcommunity-a.akamaihd.net 47321B
