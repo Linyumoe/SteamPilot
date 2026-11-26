@@ -52,6 +52,16 @@ cargo build --release
 cargo test --release
 ```
 
+## 更新
+
+设置页「检查更新」会读取 [GitHub Releases](https://github.com/Linyumoe/SteamPilot/releases/latest) 的最新版本并提示；有新版本时用系统浏览器打开发布页手动下载，程序不会自动下载或替换自身文件。启动时默认静默检查一次，可在设置里关闭。
+
+发布新版本：打个 `v` 开头的 tag 并推送，GitHub Actions 会自动构建并创建 Release：
+
+```bash
+git tag v0.2.0 && git push origin v0.2.0
+```
+
 ## 许可证
 
 MIT — 见 [LICENSE](LICENSE)。

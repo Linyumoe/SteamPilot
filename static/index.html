@@ -208,10 +208,13 @@
               <div class="row-label"><strong>启动后自动加速</strong><span>沿用上次启用的服务</span></div>
               <input type="checkbox" class="sw" id="set-auto" />
             </label>
-            <label class="row-line">
-              <div class="row-label"><strong>自动检查更新</strong><span>GitHub Releases 通道</span></div>
-              <input type="checkbox" class="sw" id="set-update" checked />
-            </label>
+            <div class="row-line">
+              <div class="row-label"><strong>检查更新</strong><span id="update-status">当前版本 v0.1.0 · GitHub Releases 通道</span></div>
+              <div class="row-update-actions">
+                <button class="btn-sm" id="btn-check-update" title="检查是否有新版本">检查</button>
+                <input type="checkbox" class="sw" id="set-update" checked title="启动时自动检查更新" />
+              </div>
+            </div>
           </section>
 
           <section class="sec">

@@ -4,6 +4,7 @@ pub mod core;
 pub mod proxy;
 pub mod selector;
 pub mod tray;
+pub mod update;
 
 use ca::CaStore;
 use proxy::{ProxyHandle, SharedState};
@@ -828,6 +829,18 @@ async fn refresh_nodes(
     Ok(commit(&app, &state))
 }
 
+/// 检查 GitHub Releases 是否有新版本（纯读，不改状态、不下载）。
+#[tauri::command]
+async fn check_update() -> update::UpdateInfo {
+    update::check().await
+}
+
+/// 用系统浏览器打开发布/下载页。url 限定为本仓库发布页，避免被当成任意 URL 打开器。
+#[tauri::command]
+fn open_releases() -> Result<(), String> {
+    update::open_releases().map_err(|e| e.to_string())
+}
+
 #[tauri::command]
 fn get_logs(state: State<'_, SharedState>) -> Vec<String> {
     state.lock().unwrap().logs.clone()
@@ -889,6 +902,8 @@ pub fn run() {
             install_ca,
             uninstall_ca,
             refresh_nodes,
+            check_update,
+            open_releases,
             get_logs,
             clear_logs
         ])

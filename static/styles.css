@@ -561,6 +561,9 @@ input[type="checkbox"].sw.sm:checked::after { left: 15px; }
   border-bottom: 1px solid var(--line-soft);
 }
 .row-line:last-child { border-bottom: 0; }
+.row-update-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.row-label span.has-update { color: var(--accent); }
+.row-label span.check-error { color: var(--amber); }
 .row-label { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .row-label strong { font-size: 12px; font-weight: 500; }
 .row-label span { color: var(--dim-2); font-size: 10.5px; }

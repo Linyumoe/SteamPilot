@@ -182,6 +182,7 @@ const ui = {
   lastTested: "",
   drawerOpen: false,
   drawerDraft: null,
+  updateInfo: null,
 };
 
 /* --------------------------------- mock --------------------------------- */
@@ -266,6 +267,10 @@ function mockInvoke(cmd, args = {}) {
       break;
     case "refresh_nodes":
       state.nodesOptimized = true;
+      break;
+    case "check_update":
+      return { current: "0.1.0", latest: "0.1.0", available: false, url: "https://github.com/Linyumoe/SteamPilot/releases/latest", notes: "", error: "" };
+    case "open_releases":
       break;
     default:
       console.warn("未实现的命令", cmd, args);
@@ -530,6 +535,7 @@ function renderSettings() {
   document.getElementById("ca-pill").textContent = caOn ? "已信任" : "未安装";
   document.getElementById("ca-pill").className = `pill ${caOn ? "ok" : "wait"}`;
   document.getElementById("ca-status").textContent = caOn ? "本地根证书已安装并被系统信任" : "本地根证书未安装";
+  renderUpdateStatus();
 }
 
 function applyTheme() {
@@ -553,6 +559,52 @@ function showToast(msg) {
   el.classList.add("show");
   clearTimeout(showToast.timer);
   showToast.timer = setTimeout(() => el.classList.remove("show"), 1800);
+}
+
+function renderUpdateStatus() {
+  const el = document.getElementById("update-status");
+  const btn = document.getElementById("btn-check-update");
+  if (!el) return;
+  const info = ui.updateInfo;
+  el.className = "";
+  if (!info) {
+    el.textContent = "当前版本 v0.1.0 · GitHub Releases 通道";
+    return;
+  }
+  if (info.available) {
+    el.textContent = `发现新版本 v${info.latest} · 点「前往下载」查看`;
+    el.className = "has-update";
+    if (btn) btn.textContent = "前往下载";
+  } else if (info.error) {
+    el.textContent = info.error;
+    el.className = "check-error";
+    if (btn) btn.textContent = "重试";
+  } else {
+    el.textContent = `当前版本 v${info.current} · 已是最新版本`;
+    if (btn) btn.textContent = "检查";
+  }
+}
+
+async function checkUpdate(manual = true) {
+  const btn = document.getElementById("btn-check-update");
+  if (btn) btn.disabled = true;
+  if (manual) showToast("正在检查更新…");
+  try {
+    const info = await invoke("check_update");
+    ui.updateInfo = info;
+    renderUpdateStatus();
+    if (manual) {
+      if (info.available) showToast(`发现新版本 v${info.latest}`);
+      else if (info.error) showToast(info.error);
+      else showToast("已是最新版本");
+    }
+  } catch (err) {
+    ui.updateInfo = { current: "0.1.0", latest: "", available: false, url: "", notes: "", error: "检查更新失败" };
+    renderUpdateStatus();
+    if (manual) showToast("检查更新失败，请稍后重试");
+  } finally {
+    if (btn) btn.disabled = false;
+  }
 }
 
 function switchView(view) {
@@ -686,6 +738,16 @@ document.addEventListener("click", async (e) => {
   }
   const cdnRetest = e.target.closest("[data-cdn-retest]");
   if (cdnRetest) return retest(cdnRetest.dataset.cdnRetest);
+
+  // 设置页：检查更新 / 有新版本时前往下载
+  if (e.target.closest("#btn-check-update")) {
+    if (ui.updateInfo && ui.updateInfo.available) {
+      if (inTauri) await invoke("open_releases");
+      else window.open("https://github.com/Linyumoe/SteamPilot/releases/latest", "_blank");
+      return;
+    }
+    return checkUpdate(true);
+  }
 
   // 测速设置抽屉：统一从页头按钮进入
   if (e.target.closest("#cdn-settings-btn")) return openTester();
@@ -834,4 +896,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (qTheme === "light" || qTheme === "dark") state.theme = qTheme;
   renderAll();
   switchView("home");
+  // 启动后静默检查一次更新（设置页「检查更新」开关控制），有新版会在设置页标出。
+  if (ui.updateCheck) setTimeout(() => checkUpdate(false), 1200);
 });
