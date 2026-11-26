@@ -269,7 +269,7 @@ function mockInvoke(cmd, args = {}) {
       state.nodesOptimized = true;
       break;
     case "check_update":
-      return { current: "0.1.2", latest: "0.1.2", available: false, url: "https://github.com/Linyumoe/SteamPilot/releases/latest", downloadUrl: "", mirrorUrl: "", notes: "", error: "" };
+      return { current: "0.1.3", latest: "0.1.3", available: false, url: "https://github.com/Linyumoe/SteamPilot/releases/latest", downloadUrl: "", mirrorUrl: "", notes: "", error: "" };
     case "open_releases":
       break;
     case "open_download_url":
@@ -572,7 +572,7 @@ function renderUpdateStatus() {
   el.className = "";
   if (mirror) mirror.hidden = true;
   if (!info) {
-    el.textContent = "当前版本 v0.1.2 · GitHub Releases 通道";
+    el.textContent = "当前版本 v0.1.3 · GitHub Releases 通道";
     return;
   }
   if (info.available) {
@@ -606,7 +606,7 @@ async function checkUpdate(manual = true) {
       else showToast("已是最新版本");
     }
   } catch (err) {
-    ui.updateInfo = { current: "0.1.2", latest: "", available: false, url: "", downloadUrl: "", mirrorUrl: "", notes: "", error: "检查更新失败" };
+    ui.updateInfo = { current: "0.1.3", latest: "", available: false, url: "", downloadUrl: "", mirrorUrl: "", notes: "", error: "检查更新失败" };
     renderUpdateStatus();
     if (manual) showToast("检查更新失败，请稍后重试");
   } finally {

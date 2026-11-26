@@ -2,12 +2,19 @@
 <html lang="zh-CN">
 <head><meta charset="utf-8"><title>SteamPilot 预览</title></head>
 <body style="margin:0;background:#000;overflow:hidden">
-  <div style="width:1240px;height:820px;transform:scale(.66);transform-origin:0 0">
-    <iframe id="f" src="index.html" style="width:1240px;height:820px;border:0;display:block"></iframe>
+  <div id="box" style="transform-origin:0 0">
+    <iframe id="f" src="index.html" style="border:0;display:block"></iframe>
   </div>
   <script>
     const p = new URLSearchParams(location.search);
     const f = document.getElementById("f");
+    // 默认按应用真实窗口尺寸预览；可用 w/h 覆盖，scale 控制缩放。
+    const W = Number(p.get("w")) || 980, H = Number(p.get("h")) || 700;
+    const scale = Number(p.get("scale")) || 1;
+    const box = document.getElementById("box");
+    box.style.width = W + "px"; box.style.height = H + "px";
+    box.style.transform = `scale(${scale})`;
+    f.style.width = W + "px"; f.style.height = H + "px";
     const th0 = p.get("theme");
     if (th0) f.src = `index.html?theme=${th0}`;
     f.addEventListener("load", () => {

@@ -674,15 +674,15 @@ body.advanced .nav-home-toggle { display: none !important; }
 .home-wrap {
   flex: 1; min-width: 0; overflow: auto;
   display: grid; place-items: center;
-  padding: 28px 20px 40px;
+  padding: 24px 22px 28px;
 }
 .home-card {
-  width: min(520px, 100%);
+  width: min(640px, 100%);
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 14px;
   box-shadow: var(--shadow);
-  padding: 22px;
+  padding: 26px 28px;
 }
 .home-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .home-brand { display: flex; align-items: center; gap: 11px; min-width: 0; }
@@ -693,37 +693,37 @@ body.advanced .nav-home-toggle { display: none !important; }
   color: #fff; font-size: 12px; font-weight: 800;
   box-shadow: 0 6px 16px rgba(255, 100, 72, 0.22);
 }
-.home-brand h1 { margin: 0; font-size: 16px; font-weight: 650; }
-.home-brand p { margin: 3px 0 0; color: var(--dim-2); font-size: 11px; }
+.home-brand h1 { margin: 0; font-size: 19px; font-weight: 650; }
+.home-brand p { margin: 4px 0 0; color: var(--dim-2); font-size: 12px; }
 
 .home-welcome {
-  margin-top: 16px; padding: 10px 12px;
-  display: flex; flex-direction: column; gap: 2px;
+  margin-top: 18px; padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 3px;
   background: var(--accent-soft); border: 1px solid var(--accent-line);
   border-radius: 8px;
 }
-.home-welcome strong { font-size: 12px; font-weight: 600; }
-.home-welcome span { color: var(--dim); font-size: 10.5px; }
+.home-welcome strong { font-size: 13px; font-weight: 600; }
+.home-welcome span { color: var(--dim); font-size: 11px; }
 
 /* 四步引导 */
-.steps-list { list-style: none; margin: 20px 0 0; padding: 0; }
+.steps-list { list-style: none; margin: 16px 0 0; padding: 0; }
 .step-item {
-  display: flex; gap: 12px; padding: 14px 0;
+  display: flex; gap: 14px; padding: 16px 0;
   border-bottom: 1px solid var(--line-soft);
 }
 .step-item:last-child { border-bottom: 0; }
 .step-no {
-  width: 24px; height: 24px; flex: 0 0 24px; border-radius: 50%;
-  display: grid; place-items: center; font-family: Consolas, monospace; font-size: 11px;
+  width: 27px; height: 27px; flex: 0 0 27px; border-radius: 50%;
+  display: grid; place-items: center; font-family: Consolas, monospace; font-size: 12px;
   background: var(--panel-2); border: 1px solid var(--line); color: var(--dim-2);
 }
 .step-no.done { background: var(--green-soft); border-color: transparent; color: var(--green); }
 .step-body { flex: 1; min-width: 0; }
 .step-line { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.step-line strong { font-size: 12.5px; font-weight: 600; }
-.step-state { color: var(--dim-2); font-size: 11px; white-space: nowrap; }
+.step-line strong { font-size: 13.5px; font-weight: 600; }
+.step-state { color: var(--dim-2); font-size: 11.5px; white-space: nowrap; }
 .step-state.ok { color: var(--green); }
-.step-item p { margin: 4px 0 10px; color: var(--dim-2); font-size: 11px; line-height: 1.6; }
+.step-item p { margin: 5px 0 12px; color: var(--dim-2); font-size: 12px; line-height: 1.6; }
 .step-item .btn-sm { min-width: 88px; }
 #step-run { padding-top: 18px; }
 
@@ -742,18 +742,21 @@ body.advanced .nav-home-toggle { display: none !important; }
 .home-run-ico { width: 15px; height: 15px; }
 .home-hint { margin: 9px 0 0; text-align: center; color: var(--dim-2); font-size: 11px; }
 
-.home-sites { margin-top: 8px; }
+.home-sites {
+  margin-top: 10px;
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 18px;
+}
 .home-site {
-  display: flex; align-items: center; gap: 10px;
+  display: flex; align-items: center; gap: 8px;
   padding: 9px 2px; border-bottom: 1px solid var(--line-soft);
 }
-.home-site:last-child { border-bottom: 0; }
 .home-site-txt { flex: 1; min-width: 0; }
-.home-site-txt strong { display: block; font-size: 12.5px; font-weight: 500; }
+.home-site-txt strong { display: block; font-size: 12px; font-weight: 500; }
 .home-site-txt small {
-  display: block; color: var(--dim-2); font-size: 10.5px; margin-top: 2px;
+  display: block; color: var(--dim-2); font-size: 10px; margin-top: 2px;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
+@media (max-width: 760px) { .home-sites { grid-template-columns: 1fr; } }
 
 .simple-foot {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;

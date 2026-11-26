@@ -1,6 +1,6 @@
 [package]
 name = "steampilot"
-version = "0.1.2"
+version = "0.1.3"
 description = "SteamPilot - Steam/GitHub/Epic 网页加速与 CDN 优选工具"
 authors = ["SteamPilot"]
 edition = "2021"
