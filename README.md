@@ -52,9 +52,12 @@ cargo build --release
 cargo test --release
 ```
 
-## 更新
+## 下载与更新
 
-设置页「检查更新」会读取 [GitHub Releases](https://github.com/Linyumoe/SteamPilot/releases/latest) 的最新版本并提示；有新版本时用系统浏览器打开发布页手动下载，程序不会自动下载或替换自身文件。启动时默认静默检查一次，可在设置里关闭。
+从 [GitHub Releases](https://github.com/Linyumoe/SteamPilot/releases/latest) 下载 `SteamPilot-*-win-x64.zip`。直连困难时可用发布页给出的 gh-proxy 镜像直链；应用内发现有新版本时也会直接提供「镜像下载」按钮。程序不会自动下载或替换自身文件，启动时默认静默检查一次更新，可在设置里关闭。
+
+> 镜像是第三方反代，发布页同时给出该安装包的 SHA256。镜像下载后请先校验哈希再运行：
+> `Get-FileHash .\SteamPilot-xxx-win-x64.zip -Algorithm SHA256`
 
 发布新版本：打个 `v` 开头的 tag 并推送，GitHub Actions 会自动构建并创建 Release：
 

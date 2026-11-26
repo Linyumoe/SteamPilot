@@ -878,6 +878,15 @@ fn open_releases() -> Result<(), String> {
     update::open_releases().map_err(|e| e.to_string())
 }
 
+/// 打开发布页给出的安装包直链（官方或 gh-proxy 镜像），仅接受本仓库白名单 URL。
+#[tauri::command]
+fn open_download_url(url: String) -> Result<(), String> {
+    if !update::validate_download_url(&url) {
+        return Err("下载链接不在允许范围".into());
+    }
+    update::open_url(&url).map_err(|e| e.to_string())
+}
+
 #[tauri::command]
 fn get_logs(state: State<'_, SharedState>) -> Vec<String> {
     state.lock().unwrap().logs.clone()
@@ -946,6 +955,7 @@ pub fn run() {
             refresh_nodes,
             check_update,
             open_releases,
+            open_download_url,
             get_logs,
             clear_logs
         ])

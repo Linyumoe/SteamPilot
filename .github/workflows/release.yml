@@ -33,9 +33,32 @@ jobs:
           Copy-Item README.md dist\README.md
           Compress-Archive -Path dist\* -DestinationPath "SteamPilot-${{ github.ref_name }}-win-x64.zip"
 
+      - name: Build release notes with checksum and mirror
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $name = "SteamPilot-$tag-win-x64.zip"
+          $sha = (Get-FileHash -Algorithm SHA256 $name).Hash.ToLowerInvariant()
+          $direct = "https://github.com/${{ github.repository }}/releases/download/$tag/$name"
+          $mirror = "https://gh-proxy.org/$direct"
+          $notes = @(
+            "SteamPilot $tag · Windows x64",
+            "",
+            "**下载（二选一）**",
+            "- 官方直连：$direct",
+            "- 国内镜像（gh-proxy 第三方反代）：$mirror",
+            "",
+            "**校验**：镜像由第三方反代，下载后请核对 SHA256：",
+            "",
+            "    $sha  $name",
+            "",
+            "PowerShell 校验命令：Get-FileHash .\\$name -Algorithm SHA256"
+          )
+          Set-Content -Path release-notes.md -Value $notes -Encoding utf8
+
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: pwsh
         run: |
-          gh release create ${{ github.ref_name }} "SteamPilot-${{ github.ref_name }}-win-x64.zip" --title "SteamPilot ${{ github.ref_name }}" --generate-notes
+          gh release create ${{ github.ref_name }} "SteamPilot-${{ github.ref_name }}-win-x64.zip" --title "SteamPilot ${{ github.ref_name }}" --notes-file release-notes.md

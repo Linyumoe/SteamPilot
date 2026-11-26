@@ -269,8 +269,10 @@ function mockInvoke(cmd, args = {}) {
       state.nodesOptimized = true;
       break;
     case "check_update":
-      return { current: "0.1.0", latest: "0.1.0", available: false, url: "https://github.com/Linyumoe/SteamPilot/releases/latest", notes: "", error: "" };
+      return { current: "0.1.1", latest: "0.1.1", available: false, url: "https://github.com/Linyumoe/SteamPilot/releases/latest", downloadUrl: "", mirrorUrl: "", notes: "", error: "" };
     case "open_releases":
+      break;
+    case "open_download_url":
       break;
     default:
       console.warn("未实现的命令", cmd, args);
@@ -564,17 +566,21 @@ function showToast(msg) {
 function renderUpdateStatus() {
   const el = document.getElementById("update-status");
   const btn = document.getElementById("btn-check-update");
+  const mirror = document.getElementById("btn-mirror");
   if (!el) return;
   const info = ui.updateInfo;
   el.className = "";
+  if (mirror) mirror.hidden = true;
   if (!info) {
-    el.textContent = "当前版本 v0.1.0 · GitHub Releases 通道";
+    el.textContent = "当前版本 v0.1.1 · GitHub Releases 通道";
     return;
   }
   if (info.available) {
-    el.textContent = `发现新版本 v${info.latest} · 点右侧查看`;
+    el.textContent = `发现新版本 v${info.latest} · 直连困难可用镜像`;
     el.className = "has-update";
     if (btn) btn.textContent = "前往下载";
+    // 镜像是第三方反代，只在后端确实给出直链时显示，且不作为默认入口。
+    if (mirror && info.mirrorUrl) mirror.hidden = false;
   } else if (info.error) {
     // 检查失败（常见于 GitHub 访问受限）时保留手动入口，不让用户卡死。
     el.textContent = `${info.error} · 可手动打开发布页`;
@@ -600,7 +606,7 @@ async function checkUpdate(manual = true) {
       else showToast("已是最新版本");
     }
   } catch (err) {
-    ui.updateInfo = { current: "0.1.0", latest: "", available: false, url: "", notes: "", error: "检查更新失败" };
+    ui.updateInfo = { current: "0.1.1", latest: "", available: false, url: "", downloadUrl: "", mirrorUrl: "", notes: "", error: "检查更新失败" };
     renderUpdateStatus();
     if (manual) showToast("检查更新失败，请稍后重试");
   } finally {
@@ -748,6 +754,13 @@ document.addEventListener("click", async (e) => {
       return;
     }
     return checkUpdate(true);
+  }
+  if (e.target.closest("#btn-mirror")) {
+    const url = ui.updateInfo && ui.updateInfo.mirrorUrl;
+    if (!url) return;
+    if (inTauri) await invoke("open_download_url", { url });
+    else window.open(url, "_blank");
+    return;
   }
 
   // 测速设置抽屉：统一从页头按钮进入
