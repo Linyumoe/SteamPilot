@@ -1,0 +1,13 @@
+# IP  延迟ms  SNI | images-assets.nasa.gov HTTP 206, 三轮稳定
+3.167.163.44      705ms images-assets.nasa.gov
+204.246.164.160   909ms images-assets.nasa.gov
+23.228.214.91     899ms images-assets.nasa.gov
+65.9.125.219      803ms images-assets.nasa.gov
+204.246.168.61    842ms images-assets.nasa.gov
+3.173.179.184     709ms images-assets.nasa.gov
+18.245.230.232    672ms images-assets.nasa.gov
+205.251.251.23    868ms images-assets.nasa.gov
+204.246.175.110   735ms images-assets.nasa.gov
+23.228.212.181    680ms images-assets.nasa.gov
+54.230.203.237    711ms images-assets.nasa.gov
+120.52.153.206    830ms images-assets.nasa.gov

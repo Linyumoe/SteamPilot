@@ -2,6 +2,7 @@ pub mod ca;
 pub mod capture;
 pub mod core;
 pub mod dpapi;
+pub mod monitor;
 pub mod proxy;
 pub mod selector;
 pub mod tray;
@@ -12,6 +13,7 @@ use proxy::{ProxyHandle, SharedState};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::net::SocketAddr;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use tauri::{Emitter, Manager, State};
 
@@ -118,9 +120,10 @@ fn default_speed_urls() -> HashMap<String, String> {
         "cloudflare".into(),
         "https://speed.cloudflare.com/__down?bytes=8388608".into(),
     );
+    // CloudFront 测速标的：NASA 图片（206 稳定）。旧的 mp4 路径已失效返回 403，勿用。
     m.insert(
         "cloudfront".into(),
-        "https://images-assets.nasa.gov/video/GSFC_20171208_Archive_e000380/GSFC_20171208_Archive_e000380.mp4".into(),
+        "https://images-assets.nasa.gov/image/PIA12348/PIA12348~orig.jpg".into(),
     );
     m
 }
@@ -240,6 +243,39 @@ fn parse_nodes() -> Vec<Node> {
         "Epic / Akamai",
         "epicgames-download1.akamaized.net",
     );
+
+    // Cloudflare / CloudFront：Anycast，用测速域名自身 SNI 标准验签（不伪装），
+    // Range GET 206 + 三轮复测稳定的节点。格式与 Epic 相同：IP  延迟ms  SNI。
+    fn push_cdn(out: &mut Vec<Node>, data: &str, provider: &str, group: &str, host: &str) {
+        for line in data.lines() {
+            let p: Vec<&str> = line.split_whitespace().collect();
+            if p.len() >= 3 && p[0].contains('.') && !p[0].starts_with('#') {
+                out.push(Node {
+                    ip: p[0].to_string(),
+                    provider: provider.into(),
+                    group: group.into(),
+                    sni: p[2].to_string(),
+                    host: host.into(),
+                    latency_ms: p[1].trim_end_matches("ms").parse().unwrap_or(0),
+                    status: "稳定".into(),
+                });
+            }
+        }
+    }
+    push_cdn(
+        &mut out,
+        include_str!("../resources/nodes/cloudflare.txt"),
+        "cloudflare",
+        "Cloudflare / Anycast",
+        "speed.cloudflare.com",
+    );
+    push_cdn(
+        &mut out,
+        include_str!("../resources/nodes/cloudfront.txt"),
+        "cloudfront",
+        "CloudFront / AWS",
+        "images-assets.nasa.gov",
+    );
     out
 }
 
@@ -335,20 +371,20 @@ impl Default for AppState {
                 Provider {
                     id: "cloudflare".into(),
                     name: "Cloudflare".into(),
-                    enabled: false,
-                    status: "待接入".into(),
-                    nodes: 0,
-                    latency_ms: 0,
-                    note: "Nexus Mods（v1 后）".into(),
+                    enabled: true,
+                    status: "已优选".into(),
+                    nodes: count("cloudflare"),
+                    latency_ms: best("cloudflare"),
+                    note: "Nexus Mods 等 CF 站点（Anycast，真域名 SNI）".into(),
                 },
                 Provider {
                     id: "cloudfront".into(),
                     name: "CloudFront".into(),
-                    enabled: false,
-                    status: "待接入".into(),
-                    nodes: 0,
-                    latency_ms: 0,
-                    note: "Twitch / AWS 资源（v1 后）".into(),
+                    enabled: true,
+                    status: "已优选".into(),
+                    nodes: count("cloudfront"),
+                    latency_ms: best("cloudfront"),
+                    note: "AWS 资源（Anycast，真域名 SNI）".into(),
                 },
             ],
             sites: vec![
@@ -382,10 +418,10 @@ impl Default for AppState {
                     "nexus",
                     "Nexus Mods",
                     "game",
-                    "www.nexusmods.com · staticdelivery.nexusmods.com",
+                    "www.nexusmods.com · staticdelivery.nexusmods.com · cdn.nexusmods.com",
                     "cloudflare",
-                    "Cloudflare 线路上线后开放",
-                    false,
+                    "Cloudflare Anycast 优选池（真域名 SNI，标准验签）",
+                    true,
                     vec![],
                 ),
                 // ---- 开发者工具 ----
@@ -867,6 +903,8 @@ pub fn run() {
         proxy: Mutex::new(None),
     };
     let silent = tray::silent_launch();
+    let monitor_stop = Arc::new(AtomicBool::new(false));
+    let monitor_stop_for_setup = monitor_stop.clone();
 
     let app = tauri::Builder::default()
         .manage(Arc::new(Mutex::new(AppState::default())) as SharedState)
@@ -885,6 +923,9 @@ pub fn run() {
                     w.hide()?;
                 }
             }
+            // M3 后台探针：只在加速运行时每 60s 轻量复测，退出时由 stop 置位停止。
+            let shared = app.state::<SharedState>().inner().clone();
+            monitor::start(app.handle().clone(), shared, monitor_stop_for_setup);
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -912,8 +953,9 @@ pub fn run() {
         .expect("failed to build SteamPilot");
 
     // 进程退出（含托盘「退出」直接 app.exit）时兜底恢复系统代理，避免用户断网。
-    app.run(|_app, event| {
+    app.run(move |_app, event| {
         if matches!(event, tauri::RunEvent::Exit) {
+            monitor_stop.store(true, Ordering::SeqCst);
             let _ = capture::restore();
         }
     });

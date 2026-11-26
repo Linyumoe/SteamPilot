@@ -37,6 +37,10 @@ impl ProxyHandle {
 
 pub type SharedState = Arc<Mutex<AppState>>;
 
+/// 上游 connector：全局共享一个实例，rustls 默认的内存会话票据
+/// （Resumption::in_memory_sessions）因此跨请求复用——这就是 M3 的 TLS 会话恢复，
+/// 无需额外配置。ALPN 固定 http/1.1：代理要逐请求解析 Host 做分流，
+/// 且实测社区主站只谈 http/1.1，强开 h2 对主站无收益、对静态资源要重写整条转发链。
 fn upstream_connector() -> Arc<rustls::ClientConfig> {
     let roots = rustls::RootCertStore {
         roots: webpki_roots::TLS_SERVER_ROOTS.to_vec(),
@@ -339,10 +343,20 @@ async fn handle_client(
                 if picked.is_empty() {
                     (vec![(host.clone(), upstream_sni)], page_fix, false)
                 } else {
+                    // Cloudflare/CloudFront 是 Anycast：节点池里的 sni 只是测速标的，
+                    // 真实请求必须用浏览器请求的真域名做 SNI，否则 CDN 按 SNI 路由到
+                    // 测速站点而非目标站点（403）。其余池（Akamai/Fastly 别名、Epic 真域名）
+                    // 沿用节点自带 sni。
+                    let anycast = provider == "cloudflare" || provider == "cloudfront";
                     (
                         picked
                             .iter()
-                            .map(|n| (n.ip.clone(), n.sni.clone()))
+                            .map(|n| {
+                                (
+                                    n.ip.clone(),
+                                    if anycast { host.clone() } else { n.sni.clone() },
+                                )
+                            })
                             .collect(),
                         page_fix,
                         true,
@@ -518,5 +532,38 @@ mod tests {
         let nodes = vec![active, candidate];
         // 候选节点即使延迟更低也排在 active 之后
         assert_eq!(pick_nodes(&nodes, "akamai", &fb)[0].ip, "1.1.1.1");
+    }
+
+    /// 注入 RST：坏节点连续失败，必须始终让好节点排首位；成功后立刻恢复。
+    #[test]
+    fn rst_injection_bad_node_always_demoted() {
+        let fb = Feedback::default();
+        let good = node("2.2.2.2", 300, "在线");
+        let bad = node("198.51.100.1", 0, "在线"); // 延迟 0，若失效评分会永久置顶
+        let nodes = vec![bad.clone(), good.clone()];
+        assert_eq!(pick_nodes(&nodes, "akamai", &fb)[0].ip, bad.ip); // 无反馈时按延迟
+        for _ in 0..20 {
+            // 模拟连续 20 次 RST：每次都惩罚，好节点始终顶上
+            fb.fail(&bad.ip);
+            assert_eq!(pick_nodes(&nodes, "akamai", &fb)[0].ip, good.ip);
+        }
+        // 坏节点恢复后立刻回到首位（成功清零惩罚 + 实测 RTT 覆盖）
+        fb.ok(&bad.ip, 50);
+        assert_eq!(pick_nodes(&nodes, "akamai", &fb)[0].ip, bad.ip);
+    }
+
+    /// DNS 污染场景：被污染的 IP 解析到不可路由地址，失败降权后不阻断其他候选。
+    #[test]
+    fn dns_poison_fallback_keeps_candidates() {
+        let fb = Feedback::default();
+        let poisoned = node("172.182.252.137", 10, "在线"); // 保留地址段（本机实测污染结果）
+        let good = node("23.220.68.149", 480, "在线");
+        let nodes = vec![poisoned.clone(), good.clone()];
+        fb.fail(&poisoned.ip);
+        let picked = pick_nodes(&nodes, "akamai", &fb);
+        assert_eq!(picked[0].ip, good.ip); // 好节点顶上
+        assert!(picked.len() >= 2); // 坏节点未被移除，仍在候选里（下轮可能恢复）
+                                    // 候选数不超过上限
+        assert!(picked.len() <= MAX_CANDIDATES);
     }
 }

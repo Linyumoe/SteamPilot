@@ -152,6 +152,29 @@ mod tests {
     }
 
     #[test]
+    fn cloudflare_site_routes_to_cloudflare_provider() {
+        let sites = vec![Site {
+            id: "nexus".into(),
+            name: "Nexus Mods".into(),
+            group: "game".into(),
+            domains: "www.nexusmods.com · staticdelivery.nexusmods.com".into(),
+            enabled: true,
+            provider: "cloudflare".into(),
+            note: String::new(),
+            custom: false,
+            features: vec![],
+        }];
+        match decide("www.nexusmods.com", &sites) {
+            Decision::Accelerate { provider, .. } => assert_eq!(provider, "cloudflare"),
+            Decision::Direct => panic!("Nexus Mods 应走 Cloudflare 池"),
+        }
+        match decide("staticdelivery.nexusmods.com", &sites) {
+            Decision::Accelerate { provider, .. } => assert_eq!(provider, "cloudflare"),
+            Decision::Direct => panic!("Nexus 静态域名应走 Cloudflare 池"),
+        }
+    }
+
+    #[test]
     fn split_mixed_separators() {
         let v = split_domains("github.com · api.github.com, raw.githubusercontent.com");
         assert_eq!(

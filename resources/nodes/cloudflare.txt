@@ -1,0 +1,11 @@
+# IP  延迟ms  SNI | speed.cloudflare.com HTTP 206, 三轮稳定
+103.22.201.187    748ms speed.cloudflare.com
+108.162.241.176   767ms speed.cloudflare.com
+188.114.107.175   830ms speed.cloudflare.com
+172.67.69.236     998ms speed.cloudflare.com
+141.101.67.162    891ms speed.cloudflare.com
+103.22.200.211    867ms speed.cloudflare.com
+190.93.252.60     989ms speed.cloudflare.com
+141.101.72.48     659ms speed.cloudflare.com
+197.234.242.188   970ms speed.cloudflare.com
+104.27.242.113    861ms speed.cloudflare.com

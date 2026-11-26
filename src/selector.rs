@@ -89,7 +89,7 @@ async fn speed_probe(
 }
 
 /// 探测单节点：TCP 连接 + 按 SNI 严格验签的 TLS 握手，返回耗时 ms。
-async fn probe_node(node: &Node, timeout_ms: u64, connector: &TlsConnector) -> Option<u32> {
+pub async fn probe_node(node: &Node, timeout_ms: u64, connector: &TlsConnector) -> Option<u32> {
     let t0 = Instant::now();
     let addr = format!("{}:443", node.ip);
     let stream = timeout(Duration::from_millis(timeout_ms), TcpStream::connect(&addr))
